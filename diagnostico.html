@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Johnny Roma IA — Diagnóstico</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --black: #0a0a0a;
+    --white: #f5f5f0;
+    --gray: #888;
+    --border: #222;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--black);
+    color: var(--white);
+    font-family: "DM Sans", sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* GRID BG */
+  body::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+    background-size: 60px 60px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* NAV */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.2rem 3rem;
+    border-bottom: 1px solid var(--border);
+    background: rgba(10,10,10,0.95);
+    backdrop-filter: blur(12px);
+  }
+
+  .nav-logo {
+    font-family: "Bebas Neue", sans-serif;
+    font-size: 1.1rem;
+    letter-spacing: 0.2em;
+    color: var(--white);
+    text-decoration: none;
+  }
+
+  .nav-back {
+    font-family: "Space Mono", monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--gray);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+
+  .nav-back:hover { color: var(--white); }
+
+  /* MAIN */
+  main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 8rem 1.5rem 4rem;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* HEADER */
+  .form-header {
+    text-align: center;
+    margin-bottom: 3.5rem;
+    animation: fadeUp 0.8s ease both;
+  }
+
+  .form-logo {
+    width: 80px;
+    height: 80px;
+    margin-bottom: 1.5rem;
+    filter: drop-shadow(0 0 20px rgba(255,255,255,0.08));
+  }
+
+  .form-eyebrow {
+    font-family: "Space Mono", monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--gray);
+    margin-bottom: 0.8rem;
+  }
+
+  .form-title {
+    font-family: "Bebas Neue", sans-serif;
+    font-size: clamp(2rem, 6vw, 3.5rem);
+    letter-spacing: 0.04em;
+    line-height: 1;
+    margin-bottom: 1rem;
+  }
+
+  .form-sub {
+    font-size: 0.9rem;
+    color: var(--gray);
+    max-width: 420px;
+    line-height: 1.6;
+    font-weight: 300;
+  }
+
+  /* FORM */
+  .form-wrap {
+    width: 100%;
+    max-width: 560px;
+    animation: fadeUp 0.8s ease 0.15s both;
+  }
+
+  .field {
+    margin-bottom: 1.8rem;
+  }
+
+  .field-label {
+    display: block;
+    font-family: "Space Mono", monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--gray);
+    margin-bottom: 0.8rem;
+  }
+
+  .field-num {
+    color: var(--white);
+    margin-right: 0.5rem;
+  }
+
+  input[type="text"],
+  input[type="email"],
+  input[type="tel"],
+  textarea {
+    width: 100%;
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid var(--border);
+    padding: 0.8rem 0;
+    color: var(--white);
+    font-family: "DM Sans", sans-serif;
+    font-size: 1rem;
+    font-weight: 300;
+    outline: none;
+    transition: border-color 0.3s;
+    border-radius: 0;
+    -webkit-appearance: none;
+  }
+
+  input[type="text"]:focus,
+  input[type="email"]:focus,
+  input[type="tel"]:focus,
+  textarea:focus {
+    border-bottom-color: var(--white);
+  }
+
+  textarea {
+    resize: none;
+    height: 80px;
+  }
+
+  input::placeholder,
+  textarea::placeholder {
+    color: #333;
+    font-weight: 300;
+  }
+
+  /* RADIO GROUP */
+  .radio-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+    margin-top: 0.5rem;
+  }
+
+  .radio-option {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    cursor: pointer;
+    padding: 0.9rem 1.2rem;
+    border: 1px solid var(--border);
+    transition: border-color 0.2s, background 0.2s;
+  }
+
+  .radio-option:hover {
+    border-color: #444;
+    background: #0d0d0d;
+  }
+
+  .radio-option input[type="radio"] {
+    display: none;
+  }
+
+  .radio-dot {
+    width: 14px;
+    height: 14px;
+    border: 1px solid var(--gray);
+    flex-shrink: 0;
+    position: relative;
+    transition: border-color 0.2s;
+  }
+
+  .radio-option input[type="radio"]:checked ~ .radio-dot {
+    border-color: var(--white);
+    background: var(--white);
+  }
+
+  .radio-option input[type="radio"]:checked ~ .radio-text {
+    color: var(--white);
+  }
+
+  .radio-option:has(input:checked) {
+    border-color: var(--white);
+    background: #0d0d0d;
+  }
+
+  .radio-text {
+    font-size: 0.9rem;
+    color: var(--gray);
+    font-weight: 300;
+    transition: color 0.2s;
+  }
+
+  /* DIVIDER */
+  .field-divider {
+    width: 100%;
+    height: 1px;
+    background: var(--border);
+    margin: 2rem 0;
+  }
+
+  /* SUBMIT */
+  .btn-submit {
+    width: 100%;
+    background: var(--white);
+    color: var(--black);
+    font-family: "Space Mono", monospace;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    padding: 1.1rem 2rem;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s;
+    clip-path: polygon(8px 0%, 100% 0%, calc(100% - 8px) 100%, 0% 100%);
+    margin-top: 0.5rem;
+  }
+
+  .btn-submit:hover {
+    background: var(--black);
+    color: var(--white);
+    outline: 1px solid var(--white);
+  }
+
+  .btn-submit:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+
+  /* SUCCESS */
+  .success-screen {
+    display: none;
+    text-align: center;
+    animation: fadeUp 0.6s ease both;
+  }
+
+  .success-screen.visible { display: block; }
+
+  .success-icon {
+    font-size: 3rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .success-title {
+    font-family: "Bebas Neue", sans-serif;
+    font-size: 2.5rem;
+    letter-spacing: 0.06em;
+    margin-bottom: 1rem;
+  }
+
+  .success-text {
+    font-size: 0.9rem;
+    color: var(--gray);
+    line-height: 1.7;
+    max-width: 380px;
+    margin: 0 auto 2rem;
+    font-weight: 300;
+  }
+
+  .success-link {
+    font-family: "Space Mono", monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--gray);
+    text-decoration: none;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 0.2rem;
+    transition: color 0.2s, border-color 0.2s;
+  }
+
+  .success-link:hover { color: var(--white); border-color: var(--white); }
+
+  /* FOOTER */
+  footer {
+    position: relative;
+    z-index: 1;
+    border-top: 1px solid var(--border);
+    padding: 1.5rem 3rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .footer-brand {
+    font-family: "Bebas Neue", sans-serif;
+    font-size: 0.9rem;
+    letter-spacing: 0.2em;
+  }
+
+  .footer-copy {
+    font-family: "Space Mono", monospace;
+    font-size: 0.55rem;
+    color: var(--gray);
+    letter-spacing: 0.1em;
+  }
+
+  /* ANIMATION */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* RESPONSIVE */
+  @media (max-width: 600px) {
+    nav { padding: 1rem 1.5rem; }
+    footer { padding: 1.5rem; flex-direction: column; gap: 0.5rem; text-align: center; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-logo" href="https://johnnyroma-ia.github.io/Johnny-Roma-IA/">Johnny Roma IA</a>
+  <a class="nav-back" href="https://johnnyroma-ia.github.io/Johnny-Roma-IA/">← Volver</a>
+</nav>
+
+<main>
+
+  <!-- FORM HEADER -->
+  <div class="form-header" id="formHeader">
+    <img class="form-logo" src="data:image/png;base64,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" alt="Roma">
+    <p class="form-eyebrow">Diagnóstico Gratuito</p>
+    <h1 class="form-title">¿Tu negocio necesita<br>una solución IA?</h1>
+    <p class="form-sub">Cuatro preguntas. Sin compromiso. Solo para quienes van en serio.</p>
+  </div>
+
+  <!-- FORM -->
+  <div class="form-wrap" id="formWrap">
+    <form id="diagnosticoForm" onsubmit="handleSubmit(event)">
+
+      <!-- P1 -->
+      <div class="field">
+        <label class="field-label"><span class="field-num">01 —</span> ¿Qué tipo de negocio tienes?</label>
+        <input type="text" placeholder="Ej: Tienda de ropa, consultoría, restaurante..." required>
+      </div>
+
+      <div class="field-divider"></div>
+
+      <!-- P2 -->
+      <div class="field">
+        <label class="field-label"><span class="field-num">02 —</span> ¿Cuál es tu mayor dolor operativo hoy?</label>
+        <textarea placeholder="Ej: Pierdo clientes por responder tarde, no tengo tiempo para todo..." required></textarea>
+      </div>
+
+      <div class="field-divider"></div>
+
+      <!-- P3 -->
+      <div class="field">
+        <label class="field-label"><span class="field-num">03 —</span> ¿Estás listo para implementar una solución en los próximos 30 días?</label>
+        <div class="radio-group">
+          <label class="radio-option">
+            <input type="radio" name="disponibilidad" value="si" required>
+            <div class="radio-dot"></div>
+            <span class="radio-text">Sí, estoy listo para actuar</span>
+          </label>
+          <label class="radio-option">
+            <input type="radio" name="disponibilidad" value="explorando">
+            <div class="radio-dot"></div>
+            <span class="radio-text">Todavía estoy explorando</span>
+          </label>
+          <label class="radio-option">
+            <input type="radio" name="disponibilidad" value="no">
+            <div class="radio-dot"></div>
+            <span class="radio-text">No por ahora</span>
+          </label>
+        </div>
+      </div>
+
+      <div class="field-divider"></div>
+
+      <!-- P4 -->
+      <div class="field">
+        <label class="field-label"><span class="field-num">04 —</span> ¿Cómo prefieres que te contactemos?</label>
+        <div class="radio-group" style="margin-bottom:1.2rem;">
+          <label class="radio-option">
+            <input type="radio" name="contacto" value="whatsapp" required>
+            <div class="radio-dot"></div>
+            <span class="radio-text">WhatsApp</span>
+          </label>
+          <label class="radio-option">
+            <input type="radio" name="contacto" value="email">
+            <div class="radio-dot"></div>
+            <span class="radio-text">Email</span>
+          </label>
+        </div>
+        <input type="tel" id="contactoInput" placeholder="Tu número o correo" required>
+      </div>
+
+      <button type="submit" class="btn-submit" id="btnSubmit">
+        ▶ Enviar diagnóstico
+      </button>
+
+    </form>
+  </div>
+
+  <!-- SUCCESS -->
+  <div class="success-screen" id="successScreen">
+    <div class="success-icon">🐺</div>
+    <h2 class="success-title">Recibido.</h2>
+    <p class="success-text">Johnny revisará tu diagnóstico personalmente y te contactará en menos de 24 horas. Solo los que van en serio llegan hasta aquí.</p>
+    <a href="https://johnnyroma-ia.github.io/Johnny-Roma-IA/" class="success-link">← Volver al inicio</a>
+  </div>
+
+</main>
+
+<footer>
+  <div class="footer-brand">Johnny Roma IA</div>
+  <div class="footer-copy">© 2026 · Diagnóstico Confidencial</div>
+</footer>
+
+<script>
+function handleSubmit(e) {
+  e.preventDefault();
+
+  const btn = document.getElementById("btnSubmit");
+  btn.textContent = "Enviando...";
+  btn.disabled = true;
+
+  // Get values
+  const form = e.target;
+  const negocio = form.querySelector('input[type="text"]').value;
+  const dolor = form.querySelector("textarea").value;
+  const disponibilidad = form.querySelector('input[name="disponibilidad"]:checked')?.value;
+  const contactoPref = form.querySelector('input[name="contacto"]:checked')?.value;
+  const contactoValor = document.getElementById("contactoInput").value;
+
+  // Build WhatsApp message
+  const msg = `🐺 *Nuevo Diagnóstico — Johnny Roma IA*
+
+*01 Negocio:* ${negocio}
+
+*02 Dolor:* ${dolor}
+
+*03 Disponibilidad:* ${disponibilidad}
+
+*04 Contacto:* ${contactoPref} — ${contactoValor}`;
+
+  const waUrl = `https://wa.me/573177156116?text=${encodeURIComponent(msg)}`;
+
+  // Show success then redirect
+  setTimeout(() => {
+    document.getElementById("formHeader").style.display = "none";
+    document.getElementById("formWrap").style.display = "none";
+    document.getElementById("successScreen").classList.add("visible");
+
+    setTimeout(() => {
+      window.open(waUrl, "_blank");
+    }, 1500);
+  }, 800);
+}
+</script>
+
+</body>
+</html>
